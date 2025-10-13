@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analog Clock</title>
-    <!-- React এবং ReactDOM CDN থেকে লোড করা হচ্ছে -->
+    <title>Analog Clock with Neon Digital Display</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- JSX ব্যবহারের জন্য Babel লোড করা হচ্ছে -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* ঘড়ির জন্য CSS স্টাইল */
+        /* গ্লোবাল স্টাইলস */
+        * {
+            margin: 0;
+            padding: 0;
+            /* Poppins ফন্ট সাধারণত CDN থেকে লোড করতে হয়, কিন্তু সুবিধার জন্য এখানে ফলব্যাক ফন্ট ব্যবহার করা হয়েছে */
+            font-family: 'Arial', sans-serif;
+            box-sizing: border-box;
+        }
+
+        /* শরীরের স্টাইল */
         body {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(to right top, #0c3483, #a2b6df);
+            background: linear-gradient(to right top, #383b42, #068a53);
             margin: 0;
             font-family: 'Arial', sans-serif;
         }
@@ -27,9 +34,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px;
+            gap: 50px; /* ডিজিটাল ঘড়ির জন্য গ্যাপ বাড়ানো হয়েছে */
         }
 
+        /* --- অ্যানালগ ঘড়ির স্টাইল (পরিবর্তন করা হয়নি) --- */
         .clock {
             width: 550px;
             height: 550px;
@@ -86,7 +94,7 @@
             height: 6px;
             width: 30%;
             left: 20%;
-            background-color: #fff;
+            background-color: #001e2e;
         }
 
         .minute {
@@ -100,7 +108,7 @@
             height: 2px;
             width: 45%;
             left: 5%;
-            background-color: #ff6b6b;
+            background-color: #ffa600;
         }
 
         .point {
@@ -109,34 +117,84 @@
             left: 50%;
             width: 15px;
             height: 15px;
-            background-color: #ff6b6b;
+            background-color: #060227;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
-            border: 2px solid #fff;
+            border: 2px solid #ffa600;
         }
 
-        .digital-display {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px 30px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+        /* --- নতুন ডিজিটাল ডিসপ্লে স্টাইল (Neon Glow) --- */
+        .wrapper {
+            height: 140px; /* উচ্চতা বাড়ানো হয়েছে তারিখ দেখানোর জন্য */
+            width: 500px; /* প্রস্থ বাড়ানো হয়েছে */
+            position: relative;
+            background: linear-gradient(135deg, #14ffe9, #ffeb3b, #ff00e0);
+            border-radius: 10px;
+            cursor: default;
+            animation: animate 1.5s linear infinite;
+        }
+
+        .wrapper .display,
+        .wrapper span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .wrapper .display {
+            z-index: 999;
+            height: 125px; /* উচ্চতা বাড়ানো হয়েছে */
+            width: 485px; /* প্রস্থ বাড়ানো হয়েছে */
+            background: #1b1b1b;
+            border-radius: 6px;
             text-align: center;
+            padding-top: 5px; /* কন্টেন্ট উপরে নামানোর জন্য */
+        }
+
+        .display .time-container {
+            line-height: 70px; /* সময়ের জন্য লাইন হাইট কমানো হয়েছে */
             color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .digital-time {
-            font-size: 2.5rem;
+            font-size: 50px;
             font-weight: 600;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #14ffe9, #ffeb3b, #ff00e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: animate 1.5s linear infinite;
+        }
+        
+        .display .date-container {
+            font-size: 1.2rem;
+            color: #ffffff;
+            line-height: 1.5;
+            margin-top: 5px; /* সময়ের নিচে তারিখকে ঠেলে দেওয়া হয়েছে */
+            background: linear-gradient(135deg, #ffeb3b, #14ffe9, #ff00e0); /* তারিখের জন্য আলাদা গ্লো */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: animate 1.5s linear infinite reverse; /* উল্টো অ্যানিমেশন */
         }
 
-        .digital-date {
-            font-size: 1.2rem;
-            margin-top: 5px;
+        @keyframes animate {
+            100%{
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .wrapper span {
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            background: inherit;
+        }
+
+        .wrapper span:first-child {
+            filter: blur(7px);
+        }
+
+        .wrapper span:last-child {
+            filter: blur(20px);
         }
     </style>
 </head>
@@ -144,8 +202,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // মূল অ্যাপ্লিকেশন কম্পোনেন্ট
         const App = () => {
-            const timezone = "Asia/Dhaka";
+            // "Asia/Dhaka" হলো বাংলাদেশের সময় অঞ্চল
+            const timezone = "Asia/Dhaka"; 
 
             return (
                 <div className="container">
@@ -155,6 +215,7 @@
             );
         };
 
+        // ডিজিটাল ঘড়ি কম্পোনেন্ট (নতুন Neon ডিজাইন সহ)
         const DigitalDisplay = ({ timezone }) => {
             const [time, setTime] = React.useState(new Date());
 
@@ -163,9 +224,11 @@
                 return () => clearInterval(timerId);
             }, []);
 
+            // বর্তমান সময়, নির্দিষ্ট সময় অঞ্চল অনুযায়ী
             const timeInTimezone = new Date(time.toLocaleString("en-US", { timeZone: timezone }));
             const hour = timeInTimezone.getHours();
 
+            // বাংলা সময় ভাগ করার ফাংশন
             const getBengaliTimeOfDay = (h) => {
                 if (h >= 5 && h < 12) return "সকাল";
                 if (h >= 12 && h < 16) return "দুপুর";
@@ -177,19 +240,25 @@
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: timezone };
             const timeOptions = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, timeZone: timezone };
 
+            // bn-BD লোকাল ব্যবহার করে বাংলা তারিখ ও সময় ফরম্যাট করা
             const formattedDate = new Intl.DateTimeFormat('bn-BD', dateOptions).format(time);
             const formattedTime = new Intl.DateTimeFormat('bn-BD', timeOptions).format(time);
             const timeOfDay = getBengaliTimeOfDay(hour);
 
+            // নতুন ডিজাইন অনুযায়ী JSX রিটার্ন করা হয়েছে
             return (
-                <div className="digital-display">
-                    <div className="digital-time">{`${timeOfDay} ${formattedTime}`}</div>
-                    <div className="digital-date">{formattedDate}</div>
+                <div className="wrapper">
+                    <div className="display">
+                        <div className="time-container">{`${timeOfDay} ${formattedTime}`}</div>
+                        <div className="date-container">{formattedDate}</div>
+                    </div>
+                    <span></span>
+                    <span></span>
                 </div>
             );
         };
 
-        // React কম্পোনেন্ট
+        // অ্যানালগ ঘড়ি কম্পোনেন্ট
         const AnalogClock = ({ timezone }) => {
             const [time, setTime] = React.useState(new Date());
 
@@ -203,6 +272,7 @@
                 };
             }, []);
 
+            // ফুলস্ক্রিন টগল করার ফাংশন
             const toggleFullscreen = () => {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => {
@@ -221,10 +291,12 @@
             const minutes = timeInTimezone.getMinutes();
             const hours = timeInTimezone.getHours();
 
+            // কাঁটার ঘূর্ণন কোণ গণনা
             const secondHandRotation = (seconds / 60) * 360 + 90;
             const minuteHandRotation = (minutes / 60) * 360 + (seconds / 60) * 6 + 90;
             const hourHandRotation = (hours / 12) * 360 + (minutes / 60) * 30 + 90;
 
+            // ঘড়ির সংখ্যাগুলো তৈরি করা
             const numbers = [...Array(12)].map((_, i) => {
                 const rotation = 30 * (i + 1);
                 return (
@@ -237,6 +309,7 @@
             });
 
             return (
+                // ডাবল ক্লিক করলে ফুলস্ক্রিন হবে
                 <div className="clock" onDoubleClick={toggleFullscreen}>
                     {numbers}
                     <div className="point"></div>
