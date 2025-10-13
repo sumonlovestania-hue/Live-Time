@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Clock</title>
+    <!-- React এবং ReactDOM CDN থেকে লোড করা হচ্ছে -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- JSX ব্যবহারের জন্য Babel লোড করা হচ্ছে -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* ঘড়ির জন্য CSS স্টাইল */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to right top, #0c3483, #a2b6df);
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .clock {
+            width: 550px;
+            height: 550px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transition: width 0.5s, height 0.5s;
+            cursor: pointer;
+        }
+
+        body:fullscreen .clock {
+            width: 80vmin;
+            height: 80vmin;
+        }
+
+        body:fullscreen .number {
+            font-size: 5rem;
+        }
+
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .number span {
+            display: inline-block;
+            padding-top: 15px;
+            box-sizing: border-box;
+        }
+
+        .hand {
+            position: absolute;
+            width: 50%;
+            top: 50%;
+            transform-origin: 100%;
+            border-radius: 4px;
+            transition: transform 0.05s cubic-bezier(0.4, 2.3, 0.6, 1);
+        }
+
+        .hour {
+            height: 6px;
+            width: 30%;
+            left: 20%;
+            background-color: #fff;
+        }
+
+        .minute {
+            height: 4px;
+            width: 40%;
+            left: 10%;
+            background-color: #eee;
+        }
+
+        .second {
+            height: 2px;
+            width: 45%;
+            left: 5%;
+            background-color: #ff6b6b;
+        }
+
+        .point {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background-color: #ff6b6b;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            border: 2px solid #fff;
+        }
+
+        .digital-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .digital-time {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .digital-date {
+            font-size: 1.2rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const App = () => {
+            const timezone = "Asia/Dhaka";
+
+            return (
+                <div className="container">
+                    <AnalogClock timezone={timezone} />
+                    <DigitalDisplay timezone={timezone} />
+                </div>
+            );
+        };
+
+        const DigitalDisplay = ({ timezone }) => {
+            const [time, setTime] = React.useState(new Date());
+
+            React.useEffect(() => {
+                const timerId = setInterval(() => setTime(new Date()), 1000);
+                return () => clearInterval(timerId);
+            }, []);
+
+            const timeInTimezone = new Date(time.toLocaleString("en-US", { timeZone: timezone }));
+            const hour = timeInTimezone.getHours();
+
+            const getBengaliTimeOfDay = (h) => {
+                if (h >= 5 && h < 12) return "সকাল";
+                if (h >= 12 && h < 16) return "দুপুর";
+                if (h >= 16 && h < 18) return "বিকাল";
+                if (h >= 18 && h < 20) return "সন্ধ্যা";
+                return "রাত";
+            };
+
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: timezone };
+            const timeOptions = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, timeZone: timezone };
+
+            const formattedDate = new Intl.DateTimeFormat('bn-BD', dateOptions).format(time);
+            const formattedTime = new Intl.DateTimeFormat('bn-BD', timeOptions).format(time);
+            const timeOfDay = getBengaliTimeOfDay(hour);
+
+            return (
+                <div className="digital-display">
+                    <div className="digital-time">{`${timeOfDay} ${formattedTime}`}</div>
+                    <div className="digital-date">{formattedDate}</div>
+                </div>
+            );
+        };
+
+        // React কম্পোনেন্ট
+        const AnalogClock = ({ timezone }) => {
+            const [time, setTime] = React.useState(new Date());
+
+            React.useEffect(() => {
+                const timerId = setInterval(() => {
+                    setTime(new Date());
+                }, 1000);
+
+                return () => {
+                    clearInterval(timerId);
+                };
+            }, []);
+
+            const toggleFullscreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            };
+
+            const timeInTimezone = new Date(time.toLocaleString("en-US", { timeZone: timezone }));
+
+            const seconds = timeInTimezone.getSeconds();
+            const minutes = timeInTimezone.getMinutes();
+            const hours = timeInTimezone.getHours();
+
+            const secondHandRotation = (seconds / 60) * 360 + 90;
+            const minuteHandRotation = (minutes / 60) * 360 + (seconds / 60) * 6 + 90;
+            const hourHandRotation = (hours / 12) * 360 + (minutes / 60) * 30 + 90;
+
+            const numbers = [...Array(12)].map((_, i) => {
+                const rotation = 30 * (i + 1);
+                return (
+                    <div className="number" key={i} style={{ transform: `rotate(${rotation}deg)` }}>
+                        <span style={{ transform: `rotate(${-rotation}deg)` }}>
+                            {i + 1}
+                        </span>
+                    </div>
+                );
+            });
+
+            return (
+                <div className="clock" onDoubleClick={toggleFullscreen}>
+                    {numbers}
+                    <div className="point"></div>
+                    <div className="hand hour" style={{ transform: `rotate(${hourHandRotation}deg)` }}></div>
+                    <div className="hand minute" style={{ transform: `rotate(${minuteHandRotation}deg)` }}></div>
+                    <div className="hand second" style={{ transform: `rotate(${secondHandRotation}deg)` }}></div>
+                </div>
+            );
+        };
+
+        // React অ্যাপটি রেন্ডার করা হচ্ছে
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
